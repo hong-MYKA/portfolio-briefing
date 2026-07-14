@@ -31,7 +31,12 @@ data.json のスキーマ:
       "impact": "ポートフォリオへの影響",
       "sentiment": "警戒" | "好材料" | "要注視"
     }, ...
-  ]
+  ],
+  "outlook": {
+    "short_term": "短期(1週間)の動向予測",
+    "medium_term": "中期(1〜2か月)の動向予測",
+    "long_term": "長期(1年)の動向予測"
+  }
 }
 
 このスクリプトは reportlab で日本語+ASCII混在テキストを正しく描画するため、
@@ -384,6 +389,24 @@ def build(data, output_path):
         story.append(Spacer(1, 3 * mm))
         story.append(callout_box("注目点", h["note"], GOLD, colors.HexColor("#fbf3e3")))
         story.append(Spacer(1, 8 * mm))
+
+    outlook = data.get("outlook", {})
+    if outlook:
+        story.append(NextPageTemplate("main"))
+        story.append(P("5. 今後の動向予測", style_h2))
+        story.append(Spacer(1, 4 * mm))
+        for key, label in (
+            ("short_term", "短期(1週間)"),
+            ("medium_term", "中期(1〜2か月)"),
+            ("long_term", "長期(1年)"),
+        ):
+            text = outlook.get(key)
+            if not text:
+                continue
+            story.append(navy_header_bar(label))
+            story.append(Spacer(1, 3 * mm))
+            story.append(P(text, style_body))
+            story.append(Spacer(1, 6 * mm))
 
     doc.build(story)
 
